@@ -24,11 +24,15 @@
 
 ### Clone The Repository
 
-`git clone https://github.com/millionhz/textify.git`
+```code
+git clone https://github.com/millionhz/textify.git
+```
 
 ### Install Requirements
 
-`pip install pillow`
+```code
+pip install pillow
+```
 
 ## Usage
 
@@ -194,10 +198,16 @@ The program was made on windows and was calibrated to work with the Microsoft's 
 
 However, Inconsolata-Regular is included in the repository as an alternative open source font but it needs its own `--line-spacing` and `--y-shrink` settings.
 
-You can copy the settings from the command below to generate your images with the Inconsolata-Regular font:
+You can use the command below to generate your images with the Inconsolata-Regular font:
 
 ```code
-python textify.py --font-face font/Inconsolata-Regular.ttf --chars " `~!1f2d@" --line-spacing 1 --y-shrink 2 -i <name of output image> <image to textify>
+python textify.py --alt -i <name of output image> <input image to textify>
+```
+
+Or if you want to tweak some settings yourself you can use the recommended settings for Inconsolata-Regular font from the command below:
+
+```code
+python textify.py --font-face font/Inconsolata-Regular.ttf --chars " `~!1f2d@" --line-spacing 1 --y-shrink 2 -i <name of output image> <input image to textify>
 ```
 
 You can download the Inconsolata Font Family [here](https://fonts.google.com/specimen/Inconsolata).

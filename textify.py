@@ -48,6 +48,10 @@ parser.add_argument("--y-shrink",
                     action="store", default=1.956, type=float, metavar="VALUE",
                     help="input image y-axis shrink factor (default: %(default)s)")
 
+parser.add_argument('--alt',
+                    action='store_true',
+                    help='use alternative font settings (for mac or linux)')
+
 parsed_args = parser.parse_args()
 
 IMAGE_FILE = parsed_args.image
@@ -65,6 +69,12 @@ SPACING = parsed_args.line_spacing
 FONT_FILE = parsed_args.font_face
 Y_SHRINK = parsed_args.y_shrink
 TEXT = ""
+
+if parsed_args.alt:
+    FONT_FILE = "font/Inconsolata-Regular.ttf"
+    SPACING = 1
+    Y_SHRINK = 2
+    CHARS = " `~!1f2d@"
 
 # DEFAULT VALUES:
 # SIZE = 110
@@ -104,7 +114,7 @@ def resize(img, size=SIZE, y_shrink=Y_SHRINK):
     return img.resize((w, h), resample=Image.BICUBIC)
 
 
-def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE):
+def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE, background=WHITE_BG):
     '''Returns an textified version of the original image
 
     :param: text: ascii data of the image.
@@ -117,7 +127,7 @@ def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE):
 
     bg = 0
     tfill = 255
-    if WHITE_BG:
+    if background:
         bg, tfill = tfill, bg
 
     try:

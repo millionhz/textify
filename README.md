@@ -14,6 +14,7 @@
   - [Color Quantization](#color-quantization--q---quantize)
   - [Inversion](#inversion---invert)
   - [Image Background](#image-background---white-bg)
+  - [Transparent Background](#transparent-Background---transparent)
   - [Y-Shrink](#y-shrink---y-shrink)
   - [ASCII characters](#ascii-characters---chars)
   - [Font Size, Line Spacing and Font Face](#font-size---font-size-line-spacing---line-spacing-and-font-face---font-face)
@@ -45,7 +46,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -s VALUE, --size VALUE
-                        number of characters in a line (default: 160)
+                        number of characters in a line (default: 110)
   -c VALUE, --cutoff VALUE
                         histogram pixel cutoff percentage (default: 3)
   -q VALUE, --quantize VALUE
@@ -55,11 +56,13 @@ optional arguments:
                         image output file
   --invert              invert the provided image
   --white-bg            use white background for output image
+  --transparent         make a transparent output image
   --chars STRING        ascii character list to use (default: ' `~!sTomN@')
   --font-size VALUE     font size for image output
   --line-spacing VALUE  line spacing for image output (default: 5)
   --font-face TTF_FILE  font face for image output (default: consola.ttf)
   --y-shrink VALUE      input image y-axis shrink factor (default: 1.956)
+  --alt                 use alternative font settings (for mac or linux)
 ```
 
 ### Turning Image to ASCII
@@ -83,7 +86,7 @@ python textify.py art.jpg -t myascii.txt
 Save the generated ASCII in an image file with the `-i` argument along with a name for the output image.
 
 ```code
-python textify.py art.jpg -i myascii.jpg
+python textify.py art.jpg -i myart.jpg
 ```
 
 ### Size (-s, --size)
@@ -91,7 +94,7 @@ python textify.py art.jpg -i myascii.jpg
 Specify the number of ascii characters in one line with the `-s` argument.
 
 ```code
-python textify.py art.jpg -s 300 -i myascii.jpg
+python textify.py art.jpg -s 300 -i myart.jpg
 ```
 
 Each pixel is converted to an ascii character so the width of the image is equal to the length of a string of ascii characters. The `-s` argument must be used when making images. The larger the size the more detailed and realistic the produced image will be but the file size will be larger and the ascii characters will seem smaller.
@@ -155,12 +158,22 @@ python textify.py art.jpg --invert
 By default the images produced with the `-i` argument will have a black background. To produce an image with a white background use the `--white-bg` argument.
 
 ```code
-python textify.py art.jpg --invert --white-bg
+python textify.py art.jpg --invert --white-bg -i myart.jpg
 ```
 
 NOTE: As the program is for black backgrounds as discussed in [inversion](#inversion---invert) above, you should use the `--invert` and `--white-bg` argument together, unless you want to produce an inverted image.
 
 ![white and black background comparison](/images/wh_in.jpg)
+
+### Transparent Background (--transparent)
+
+Make images with transparent background with the `--transparent` command.
+
+```code
+python textify.py art.jpg --transparent -i myart.png
+```
+
+Make sure to use `.png` in the output file name.
 
 ### Y-Shrink (--y-shrink)
 
@@ -183,7 +196,7 @@ The `--font-size`, `--line-spacing` and `--font-face` arguments work together an
 `--font-face` argument can be used to change the font face.
 
 ```code
-python textify.py art.jpg --font-size 12 --line-spacing 5 --font-face "consola.ttf" -i my_ascii_art.jpg
+python textify.py art.jpg --font-size 12 --line-spacing 5 --font-face "consola.ttf" -i myart.jpg
 ```
 
 IMPORTANT:

@@ -29,6 +29,9 @@ parser.add_argument("--invert",
 parser.add_argument("--white-bg",
                     action="store_true",
                     help="use white background for output image")
+parser.add_argument("--transparent",
+                    action="store_true",
+                    help="make a transparent output image")
 parser.add_argument("--chars",
                     action="store", default=" `~!sTomN@", type=list, metavar="STRING",
                     help="ascii character list to use (default: '%(default)s')")
@@ -62,6 +65,7 @@ TXT_OUTPUT = parsed_args.output_text
 IMAGE_OUTPUT = parsed_args.output_image
 INVERT = parsed_args.invert
 WHITE_BG = parsed_args.white_bg
+TRANSPARENT = parsed_args.transparent
 CHARS = parsed_args.chars
 # IMG_OUT_SIZE = parsed_args.image_size
 FONT_SIZE = parsed_args.font_size
@@ -114,7 +118,7 @@ def resize(img, size=SIZE, y_shrink=Y_SHRINK):
     return img.resize((w, h), resample=Image.BICUBIC)
 
 
-def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE, background=WHITE_BG):
+def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE, white_bg=WHITE_BG, transparent=TRANSPARENT):
     '''Returns an textified version of the original image
 
     :param: text: ascii data of the image.
@@ -127,7 +131,7 @@ def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE, ba
 
     bg = 0
     tfill = 255
-    if background:
+    if white_bg:
         bg, tfill = tfill, bg
 
     try:
@@ -138,7 +142,16 @@ def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE, ba
     print("Getting Image Size")
     x, y = font.getsize_multiline(text, spacing=spacing)
     print("Rendering Image")
-    img_out = Image.new("L", (x, y), color=bg)
+
+    if transparent:
+        img_out = Image.new("RGBA", (x, y), color=(0, 0, 0, 0))
+        if white_bg:
+            tfill = (0, 0, 0, 255)
+        else:
+            tfill = (255, 255, 255, 255)
+    else:
+        img_out = Image.new("L", (x, y), color=bg)
+
     ImageDraw.Draw(img_out).multiline_text(
         (0, 0), text, fill=tfill, font=font, spacing=spacing)
     return img_out

@@ -55,19 +55,19 @@ optional arguments:
   -i FILE, --image FILE
                         image output file
   --invert              invert the provided image
-  --white-bg            use white background for output image
+  --white-bg            use white background for output image (use black color for text)
   --transparent         make a transparent output image
   --chars STRING        ascii character list to use (default: ' `~!sTomN@')
   --font-size VALUE     font size for image output
   --line-spacing VALUE  line spacing for image output (default: 5)
   --font-face TTF_FILE  font face for image output (default: consola.ttf)
-  --y-shrink VALUE      input image y-axis shrink factor (default: 1.956)
+  --y-shrink VALUE      input image y-axis shrink factor (default: 1.99999)
   --alt                 use alternative font settings (for mac or linux)
 ```
 
 ### Turning Image to ASCII
 
-Turn images to ascii by providing the filepath to the image.
+Turn images to ascii by providing the file path to the image.
 
 ```code
 python textify.py art.jpg
@@ -143,7 +143,7 @@ The program is designed to work with terminals and text editors with black backg
 
 ### Inversion (--invert)
 
-Invert the input image ith the `--invert` argument.
+Invert the input image with the `--invert` argument.
 
 The program is build to work with black backgrounds by default, which means that the darkest ASCII character is " " (blank space), which will let the black background completely pass through. This will increase the contrast of the produced image.
 

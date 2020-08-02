@@ -1,5 +1,4 @@
 import argparse
-from math import trunc
 from PIL import Image, ImageOps, ImageChops
 
 parser = argparse.ArgumentParser(description="Textify Images With Python")
@@ -28,7 +27,7 @@ parser.add_argument("--invert",
                     help="invert the provided image")
 parser.add_argument("--white-bg",
                     action="store_true",
-                    help="use white background for output image")
+                    help="use white background for output image (use black color for text)")
 parser.add_argument("--transparent",
                     action="store_true",
                     help="make a transparent output image")
@@ -48,7 +47,7 @@ parser.add_argument("--font-face",
                     action="store", default="consola.ttf", type=str, metavar="TTF_FILE",
                     help="font face for image output (default: %(default)s)")
 parser.add_argument("--y-shrink",
-                    action="store", default=1.956, type=float, metavar="VALUE",
+                    action="store", default=1.99999, type=float, metavar="VALUE",
                     help="input image y-axis shrink factor (default: %(default)s)")
 
 parser.add_argument('--alt',
@@ -79,6 +78,8 @@ if parsed_args.alt:
     SPACING = 1
     Y_SHRINK = 2
     CHARS = " `~!1f2d@"
+
+assert len(CHARS) > 1, "Specify at least 2 characters"
 
 # DEFAULT VALUES:
 # SIZE = 110
@@ -111,9 +112,9 @@ def resize(img, size=SIZE, y_shrink=Y_SHRINK):
     w = size
     h = w * aspect_ratio
     if y_shrink:
-        h = trunc(h / y_shrink)
+        h = round(h / y_shrink)
     else:
-        h = trunc(h)
+        h = round(h)
     # h = trunc((w * aspect_ratio) / y_shrink)
     return img.resize((w, h), resample=Image.BICUBIC)
 
@@ -159,40 +160,42 @@ def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE, wh
 
 ################################ PROGRAM ################################
 
-print("Opening Image")
-with Image.open(IMAGE_FILE).convert("L") as img:
+img = Image.open(IMAGE_FILE).convert("L")
 
-    print(f"Input Image Aspect Ratio: {img.height/img.width}")
+ORIG_HEIGHT = img.height
+ORIG_WIDTH = img.width
 
-    if INVERT:
-        img = ImageChops.invert(img)
+print(f"Input Image Aspect Ratio: {img.height/img.width}")
 
-    print("Resizing Image")
-    img = resize(img)
+if INVERT:
+    img = ImageChops.invert(img)
 
-    print("Adjusting Contrast")
-    img = ImageOps.autocontrast(img, cutoff=CONTRAST_CUTOFF)
+print("Resizing Image")
+img = resize(img)
 
-    if QUANTIZE < 150:
-        print("Quantizing Color")
-        img = img.quantize(QUANTIZE, method=1).convert("L")
+print("Adjusting Contrast")
+img = ImageOps.autocontrast(img, cutoff=CONTRAST_CUTOFF)
 
-    print("Converting Image to ASCII")
-    # print(f"Chars: \"{''.join(CHARS)}\"")
+if QUANTIZE < 150:
+    print("Quantizing Color")
+    img = img.quantize(QUANTIZE, method=1).convert("L")
 
-    # this will change all the values of the pixels to the
-    # indexes of the CHARS array. I am using the PIL.Image.point()
-    # as it is implemented in C which makes the program faster
+print("Converting Image to ASCII")
+# print(f"Chars: \"{''.join(CHARS)}\"")
 
-    img = img.point(lambda x: trunc((x/256)*len(CHARS)))
-    for y in range(img.height):
-        for x in range(img.width):
-            TEXT += CHARS[img.getpixel((x, y))]
-        TEXT += "\n"
+# this will change all the values of the pixels to the
+# indexes of the CHARS array. I am using the PIL.Image.point()
+# as it is implemented in C which makes the program faster
 
-    TEXT = TEXT[:-2]
+img = img.point(lambda x: round(x/255*(len(CHARS)-1)))
+for y in range(img.height):
+    for x in range(img.width):
+        TEXT += CHARS[img.getpixel((x, y))]
+    TEXT += "\n"
 
-print("Closing Image")
+TEXT = TEXT[:-2]
+
+img.close()
 
 if SIZE < 116:
     print(TEXT)

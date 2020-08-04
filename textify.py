@@ -108,9 +108,9 @@ def resize(img, size=SIZE, y_shrink=Y_SHRINK):
     :param image: image to resize (type: PIL image object).
     :return: image (type: PIL image object)
     '''
-    aspect_ratio = img.height / img.width
+    aspect_ratio = img.width / img.height
     w = size
-    h = w * aspect_ratio
+    h = w / aspect_ratio
     if y_shrink:
         h = round(h / y_shrink)
     else:

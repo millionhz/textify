@@ -10,7 +10,7 @@ parser.add_argument("-s", "--size",
                     action="store", default=110, type=int, metavar="VALUE",
                     help="number of characters in a line (default: %(default)s)")
 parser.add_argument("-c", "--cutoff",
-                    action="store", default=3, type=int, metavar="VALUE",
+                    action="store", default=3, type=float, metavar="VALUE",
                     help="histogram pixel cutoff percentage (default: %(default)s)")
 parser.add_argument("-q", "--quantize",
                     action="store", default=255, type=int, metavar="VALUE",

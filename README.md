@@ -54,6 +54,7 @@ optional arguments:
   -t FILE, --text FILE  text output file
   -i FILE, --image FILE
                         image output file
+  --random              randomize characters while producing image (use for binary images)
   --invert              invert the provided image
   --white-bg            use white background for output image (use black color for text)
   --transparent         make a transparent output image

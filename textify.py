@@ -22,6 +22,9 @@ parser.add_argument("-i", "--image",
                     action="store", type=str, dest="output_image", metavar="FILE",
                     help="image output file")
 
+parser.add_argument("--random",
+                    action="store_true",
+                    help="randomize characters while producing image (use for binary images)")
 parser.add_argument("--invert",
                     action="store_true",
                     help="invert the provided image")
@@ -62,6 +65,8 @@ CONTRAST_CUTOFF = parsed_args.cutoff
 QUANTIZE = parsed_args.quantize
 TXT_OUTPUT = parsed_args.output_text
 IMAGE_OUTPUT = parsed_args.output_image
+
+RANDOM = parsed_args.random
 INVERT = parsed_args.invert
 WHITE_BG = parsed_args.white_bg
 TRANSPARENT = parsed_args.transparent
@@ -85,6 +90,8 @@ assert len(CHARS) > 1, "Specify at least 2 characters"
 # SIZE = 110
 # CONTRAST_CUTOFF = 3
 # QUANTIZE = 255
+
+# RANDOM = False
 # INVERT = False
 # WHITE_BG = False
 # CHARS = " `~!sTomN@"
@@ -187,7 +194,18 @@ print("Converting Image to ASCII")
 # indexes of the CHARS array. I am using the PIL.Image.point()
 # as it is implemented in C which makes the program faster
 
-img = img.point(lambda x: round(x/255*(len(CHARS)-1)))
+if RANDOM:
+    print("Randomizing")
+    from random import shuffle, randint
+    shuffle(CHARS)
+    CHARS.insert(0 , " ")
+    # explicit iteration is important
+    for y in range(img.height):
+        for x in range(img.width):
+            img.putpixel((x, y), randint(1, (len(CHARS)-1)) if img.getpixel((x, y)) > 10 else 0)
+else:
+    img = img.point(lambda x: round(x/255*(len(CHARS)-1)))
+
 for y in range(img.height):
     for x in range(img.width):
         TEXT += CHARS[img.getpixel((x, y))]

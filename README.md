@@ -51,9 +51,9 @@ optional arguments:
                         histogram pixel cutoff percentage (default: 3)
   -q VALUE, --quantize VALUE
                         number of colors to quantize the image into (default: 255)
-  -t FILE, --text FILE  text output file
+  -t FILE, --text FILE  name of text output file
   -i FILE, --image FILE
-                        image output file
+                        name of image output file
   --random              randomize characters while producing image (use for binary images)
   --invert              invert the provided image
   --white-bg            use white background for output image (use black color for text)

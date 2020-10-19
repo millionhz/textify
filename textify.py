@@ -17,10 +17,10 @@ parser.add_argument("-q", "--quantize",
                     help="number of colors to quantize the image into (default: %(default)s)")
 parser.add_argument("-t", "--text",
                     action="store", type=argparse.FileType('w'), dest="output_text", metavar="FILE",
-                    help="text output file")
+                    help="name of text output file")
 parser.add_argument("-i", "--image",
                     action="store", type=str, dest="output_image", metavar="FILE",
-                    help="image output file")
+                    help="name of image output file")
 
 parser.add_argument("--random",
                     action="store_true",

@@ -189,22 +189,22 @@ if QUANTIZE < 150:
 
 print("Converting Image to ASCII")
 # print(f"Chars: \"{''.join(CHARS)}\"")
-
-# this will change all the values of the pixels to the
-# indexes of the CHARS array. I am using the PIL.Image.point()
-# as it is implemented in C which makes the program faster
-
 if RANDOM:
     print("Randomizing")
     from random import shuffle, randint
-    shuffle(CHARS)
+    shuffle(CHARS) # note that the " " character is not somewhere in the array but not at position 0
     CHARS.insert(0 , " ")
     # explicit iteration is important
     for y in range(img.height):
         for x in range(img.width):
-            img.putpixel((x, y), randint(1, (len(CHARS)-1)) if img.getpixel((x, y)) > 10 else 0)
+            img.putpixel((x, y), randint(1, (len(CHARS)-1)) if img.getpixel((x, y)) > 10 else 0) 
+            # if brightness of pixel is less than 10 put 0 else put a random value from 1 to (len(CHARS)-1))
 else:
     img = img.point(lambda x: round(x/255*(len(CHARS)-1)))
+
+# this will change all the values of the pixels to the
+# indexes of the CHARS array. I am using the PIL.Image.point()
+# as it is implemented in C which makes the program faster
 
 for y in range(img.height):
     for x in range(img.width):

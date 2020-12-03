@@ -10,7 +10,7 @@
   - [Save ASCII as Text File](#save-ascii-as-text-file--t---text)
   - [Save ASCII as Image File](#save-ascii-as-image-file--i---image)
   - [Size](#size--s---size)
-  - [Histogram Pixel Cutoff](#histogram-pixel-cutoff--c---cutoff)
+  - [Histogram Pixel Cutoff](#histogram-pixel-cutoff-&-contrast--c---cutoff)
   - [Color Quantization](#color-quantization--q---quantize)
   - [Inversion](#inversion---invert)
   - [Image Background](#image-background---white-bg)
@@ -54,6 +54,8 @@ optional arguments:
   -t FILE, --text FILE  name of text output file
   -i FILE, --image FILE
                         name of image output file
+  -clh LOW HIGH, --cutoff-low-high LOW HIGH
+                        low and high value for contrast (Check: PIL.ImageOps.autocontrast) (--clh wil override -c)
   --random              randomize characters while producing image (use for binary images)
   --invert              invert the provided image
   --white-bg            use white background for output image (use black color for text)
@@ -104,15 +106,20 @@ Recommended range for `-s` argument : < 600
 
 ![size comparison](/images/size_25.jpg)
 
-### Histogram Pixel Cutoff (-c, --cutoff)
+### Histogram Pixel Cutoff & Contrast (-c, --cutoff)
 
 Control the contrast by specifying the pixel cutoff percentage from either side of the histogram with the `-c` argument.
 
 ```code
 python textify.py art.jpg -c 6
 ```
+You can also specify the cutoff percentage of either side of histogram separately with the `-clh` argument.
+```code
+python textify.py art.jpg -clh 20 6
+```
+NOTE: `-clh` will override `-c`.
 
-To learn more about the Histogram Pixel Cutoff check [PIL.ImageOps.autocontrast()](https://pillow.readthedocs.io/en/stable/reference/ImageOps.html?#PIL.ImageOps.autocontrast)
+Check [PIL.ImageOps.autocontrast()](https://pillow.readthedocs.io/en/stable/reference/ImageOps.html?#PIL.ImageOps.autocontrast) to learn more.
 
 ![Histogram Pixel Cutoff Comparison](/images/cutoff.jpg)
 

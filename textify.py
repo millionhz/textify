@@ -22,6 +22,10 @@ parser.add_argument("-i", "--image",
                     action="store", type=str, dest="output_image", metavar="FILE",
                     help="name of image output file")
 
+parser.add_argument("-clh", "--cutoff-low-high",  # contrast-low-high
+                    action="store", type=int, dest="clh", metavar=("LOW", "HIGH"), nargs=2,
+                    help="low and high value for contrast (Check: PIL.ImageOps.autocontrast) (--clh wil override -c)")
+
 parser.add_argument("--random",
                     action="store_true",
                     help="randomize characters while producing image (use for binary images)")
@@ -76,9 +80,13 @@ FONT_SIZE = parsed_args.font_size
 SPACING = parsed_args.line_spacing
 FONT_FILE = parsed_args.font_face
 Y_SHRINK = parsed_args.y_shrink
-TEXT = ""
+
+if parsed_args.clh:
+    CONTRAST_CUTOFF = tuple(parsed_args.clh)
+    print(CONTRAST_CUTOFF)
 
 if parsed_args.alt:
+    # TODO: make a different setting set for macOS
     FONT_FILE = "font/Inconsolata-Regular.ttf"
     SPACING = 1
     Y_SHRINK = 2
@@ -105,7 +113,15 @@ assert len(CHARS) > 1, "Specify at least 2 characters"
 # print(parsed_args)
 
 
-def resize(img, size=SIZE, y_shrink=Y_SHRINK):
+def invert(img):
+    '''Returns a inverted image
+
+    :param image: image to invert (type: PIL image object).
+    :return: image (type: PIL image object)'''
+    return ImageChops.invert(img)
+
+
+def resize(img, size, y_shrink):
     '''Returns a resized image
 
     The image height is changed to compensate with the
@@ -113,8 +129,7 @@ def resize(img, size=SIZE, y_shrink=Y_SHRINK):
     when displayed as text
 
     :param image: image to resize (type: PIL image object).
-    :return: image (type: PIL image object)
-    '''
+    :return: image (type: PIL image object)'''
     aspect_ratio = img.width / img.height
     w = size
     h = w / aspect_ratio
@@ -126,15 +141,71 @@ def resize(img, size=SIZE, y_shrink=Y_SHRINK):
     return img.resize((w, h), resample=Image.BICUBIC)
 
 
-def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE, white_bg=WHITE_BG, transparent=TRANSPARENT):
+def autocontrast(img, CONTRAST_CUTOFF):
+    '''Returns a inverted image
+
+    :param image: image to invert (type: PIL image object).
+    :param CONTRAST_CUTOFF: percent to cut off from histogram (type int/ tuple)
+    :return: image (type: PIL image object)'''
+    return ImageOps.autocontrast(img, cutoff=CONTRAST_CUTOFF)
+
+
+def quantize(img, QUANTIZE):
+    '''Returns a quantized image (https://pillow.readthedocs.io/en/stable/reference/Image.html?highlight=quantize#PIL.Image.Image.quantize)
+
+    :param image: image to invert (type: PIL image object).
+    :param QUANTIZE: number of channels to quantize to (tpye: int)
+    :return: image (type: PIL image object)'''
+    if QUANTIZE < 150:
+        return img.quantize(QUANTIZE, method=1).convert("L")
+    else:
+        return img
+
+
+def convert_to_ascii(img, CHARS, RANDOM):
+    '''Returns a image ascii
+
+    :param image: image to invert (type: PIL image object).
+    :param CHARS: array of characters to use (type: array[])
+    :param RANDOM: whether to randomize characters or not (type: bool)
+    :return: ascii text (type: string)'''
+    TEXT = ""
+
+    if RANDOM:
+        from random import shuffle, randint
+        CHARS = CHARS[1:]
+        shuffle(CHARS)
+        CHARS.insert(0, " ")
+        # explicit iteration is important
+        for y in range(img.height):
+            for x in range(img.width):
+                img.putpixel((x, y), randint(1, (len(CHARS)-1))
+                             if img.getpixel((x, y)) > 10 else 0)
+                # if brightness of pixel is less than 10 put 0 else put a random value from 1 to (len(CHARS)-1))
+    else:
+        # this should be trunc()
+        img = img.point(lambda x: round(x/255*(len(CHARS)-1)))
+
+    # this will change all the values of the pixels to the
+    # indexes of the CHARS array. I am using the PIL.Image.point()
+    # as it is implemented in C which makes the program faster
+
+    for y in range(img.height):
+        for x in range(img.width):
+            TEXT += CHARS[img.getpixel((x, y))]
+        TEXT += "\n"
+
+    return TEXT[:-2]
+
+
+def image_it(text, font_size, spacing, font_file, white_bg, transparent):
     '''Returns an textified version of the original image
 
     :param: text: ascii data of the image.
     :param font_size: font size of the text.
     :param spacing: spacing between the multiline text.
     :param font_file: the ttf file of the font style to use.
-    :return: image (type: PIL image object).
-    '''
+    :return: image (type: PIL image object).'''
     from PIL import ImageDraw, ImageFont
 
     bg = 0
@@ -165,7 +236,15 @@ def image_it(text, font_size=FONT_SIZE, spacing=SPACING, font_file=FONT_FILE, wh
     return img_out
 
 
+def save_text():
+    pass
+
+
+def save_image():
+    pass
+
 ################################ PROGRAM ################################
+
 
 img = Image.open(IMAGE_FILE).convert("L")
 
@@ -174,44 +253,21 @@ ORIG_WIDTH = img.width
 
 print(f"Input Image Aspect Ratio: {img.height/img.width}")
 
-if INVERT:
-    img = ImageChops.invert(img)
-
 print("Resizing Image")
-img = resize(img)
+img = resize(img, SIZE, Y_SHRINK)
+
+print("Inverting Image")
+if INVERT:
+    img = invert(img)
 
 print("Adjusting Contrast")
-img = ImageOps.autocontrast(img, cutoff=CONTRAST_CUTOFF)
+img = autocontrast(img, CONTRAST_CUTOFF)
 
-if QUANTIZE < 150:
-    print("Quantizing Color")
-    img = img.quantize(QUANTIZE, method=1).convert("L")
+print("Quantizing Color")
+img = quantize(img, QUANTIZE)
 
 print("Converting Image to ASCII")
-# print(f"Chars: \"{''.join(CHARS)}\"")
-if RANDOM:
-    print("Randomizing")
-    from random import shuffle, randint
-    shuffle(CHARS) # note that the " " character is not somewhere in the array but not at position 0
-    CHARS.insert(0 , " ")
-    # explicit iteration is important
-    for y in range(img.height):
-        for x in range(img.width):
-            img.putpixel((x, y), randint(1, (len(CHARS)-1)) if img.getpixel((x, y)) > 10 else 0) 
-            # if brightness of pixel is less than 10 put 0 else put a random value from 1 to (len(CHARS)-1))
-else:
-    img = img.point(lambda x: round(x/255*(len(CHARS)-1)))
-
-# this will change all the values of the pixels to the
-# indexes of the CHARS array. I am using the PIL.Image.point()
-# as it is implemented in C which makes the program faster
-
-for y in range(img.height):
-    for x in range(img.width):
-        TEXT += CHARS[img.getpixel((x, y))]
-    TEXT += "\n"
-
-TEXT = TEXT[:-2]
+TEXT = convert_to_ascii(img, CHARS, RANDOM)
 
 img.close()
 
@@ -228,7 +284,8 @@ if TXT_OUTPUT:
 if IMAGE_OUTPUT:
     print("Making Image File")
 
-    img_out = image_it(TEXT)
+    img_out = image_it(TEXT, FONT_SIZE, SPACING,
+                       FONT_FILE, WHITE_BG, TRANSPARENT)
 
     # if IMG_OUT_SIZE:
     #     print("Resizing Output Image")

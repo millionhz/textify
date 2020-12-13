@@ -1,5 +1,8 @@
 import argparse
-from PIL import Image, ImageOps, ImageChops
+from PIL import Image, ImageOps, ImageChops, ImageFilter
+
+# TODO: fix contrast
+# TODO: add noise/sharpen
 
 parser = argparse.ArgumentParser(description="Textify Images With Python")
 
@@ -56,7 +59,9 @@ parser.add_argument("--font-face",
 parser.add_argument("--y-shrink",
                     action="store", default=1.99999, type=float, metavar="VALUE",
                     help="input image y-axis shrink factor (default: %(default)s)")
-
+parser.add_argument("--sharpen",
+                    action="store", default=0, type=int, metavar="VALUE",
+                    help="Number of sharpen filters (default: %(default)s)")
 parser.add_argument('--alt',
                     action='store_true',
                     help='use alternative font settings (for mac or linux)')
@@ -80,10 +85,10 @@ FONT_SIZE = parsed_args.font_size
 SPACING = parsed_args.line_spacing
 FONT_FILE = parsed_args.font_face
 Y_SHRINK = parsed_args.y_shrink
-
+SHARPEN = parsed_args.sharpen
 if parsed_args.clh:
     CONTRAST_CUTOFF = tuple(parsed_args.clh)
-    print(CONTRAST_CUTOFF)
+    # print(CONTRAST_CUTOFF)
 
 if parsed_args.alt:
     # TODO: make a different setting set for macOS
@@ -138,7 +143,7 @@ def resize(img, size, y_shrink):
     else:
         h = round(h)
     # h = trunc((w * aspect_ratio) / y_shrink)
-    return img.resize((w, h), resample=Image.BICUBIC)
+    return img.resize((w, h), resample=Image.LANCZOS)
 
 
 def autocontrast(img, CONTRAST_CUTOFF):
@@ -173,9 +178,10 @@ def convert_to_ascii(img, CHARS, RANDOM):
 
     if RANDOM:
         from random import shuffle, randint
+        first_char = CHARS[0]
         CHARS = CHARS[1:]
         shuffle(CHARS)
-        CHARS.insert(0, " ")
+        CHARS.insert(0, first_char)
         # explicit iteration is important
         for y in range(img.height):
             for x in range(img.width):
@@ -265,6 +271,10 @@ img = autocontrast(img, CONTRAST_CUTOFF)
 
 print("Quantizing Color")
 img = quantize(img, QUANTIZE)
+
+for _ in range(SHARPEN):
+    img = img.filter(ImageFilter.SHARPEN)
+
 
 print("Converting Image to ASCII")
 TEXT = convert_to_ascii(img, CHARS, RANDOM)

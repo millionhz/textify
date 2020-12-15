@@ -65,6 +65,7 @@ optional arguments:
   --line-spacing VALUE  line spacing for image output (default: 5)
   --font-face TTF_FILE  font face for image output (default: consola.ttf)
   --y-shrink VALUE      input image y-axis shrink factor (default: 1.99999)
+  --sharpen VALUE       Number of sharpen filters (default: 0)
   --alt                 use alternative font settings (for mac or linux)
 ```
 

@@ -1,9 +1,6 @@
 import argparse
 from PIL import Image, ImageOps, ImageChops, ImageFilter
 
-# TODO: fix contrast
-# TODO: add noise/sharpen
-
 parser = argparse.ArgumentParser(description="Textify Images With Python")
 
 parser.add_argument("image",
@@ -61,7 +58,7 @@ parser.add_argument("--y-shrink",
                     help="input image y-axis shrink factor (default: %(default)s)")
 parser.add_argument("--sharpen",
                     action="store", default=0, type=int, metavar="VALUE",
-                    help="Number of sharpen filters (default: %(default)s)")
+                    help="Number of iterations of sharpen filters (default: %(default)s)")
 parser.add_argument('--alt',
                     action='store_true',
                     help='use alternative font settings (for mac or linux)')
@@ -262,8 +259,8 @@ print(f"Input Image Aspect Ratio: {img.height/img.width}")
 print("Resizing Image")
 img = resize(img, SIZE, Y_SHRINK)
 
-print("Inverting Image")
 if INVERT:
+    print("Inverting Image")
     img = invert(img)
 
 print("Adjusting Contrast")

@@ -63,7 +63,7 @@ def get_args():
                         help="input image y-axis shrink factor (default: %(default)s)")
     parser.add_argument("--sharpen",
                         action="store", default=0, type=int, metavar="VALUE",
-                        help="Number of iterations of sharpen filters (default: %(default)s)")
+                        help="Number of iterations of sharpen filters (default: %(default)s) (keep between 0 and 2)")
     parser.add_argument('--alt',
                         action='store_true',
                         help="use alternative font settings (for mac or linux) (will overwrite font-face, line-spacing, y-shrink, and chars)")
@@ -101,7 +101,7 @@ def resize(img, size, y_shrink):
 
 
 def autocontrast(img, CONTRAST_CUTOFF):
-    '''Returns a inverted image
+    '''Apply Pillow's autocontrast
 
     :param image: image to invert (type: PIL image object).
     :param CONTRAST_CUTOFF: percent to cut off from histogram (type int/ tuple)
@@ -119,6 +119,18 @@ def quantize(img, QUANTIZE):
         return img.quantize(QUANTIZE, method=1).convert("L")
     else:
         return img
+
+
+def sharpen(img, SHARPEN):
+    '''Returns a sharpended image (necessary for metter results)
+
+    :param image: image to invert (type: PIL image object).
+    :param SHARPEN: number of sharpen filters to run
+    :return: image (type: PIL image object)'''
+    for _ in range(SHARPEN):
+        img = img.filter(ImageFilter.SHARPEN)
+
+    return img
 
 
 def convert_to_ascii(img, CHARS, RANDOM):
@@ -277,8 +289,7 @@ def main():
     print("Quantizing Color")
     img = quantize(img, QUANTIZE)
 
-    for _ in range(SHARPEN):
-        img = img.filter(ImageFilter.SHARPEN)
+    img = sharpen(img, SHARPEN)
 
     print("Converting Image to ASCII")
     TEXT = convert_to_ascii(img, CHARS, RANDOM)

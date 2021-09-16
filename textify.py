@@ -1,118 +1,75 @@
 import argparse
 from PIL import Image, ImageOps, ImageChops, ImageFilter
 
-parser = argparse.ArgumentParser(description="Textify Images With Python")
 
-parser.add_argument("image",
-                    action="store", type=str,
-                    help="image to textify")
-parser.add_argument("-s", "--size",
-                    action="store", default=110, type=int, metavar="VALUE",
-                    help="number of characters in a line (default: %(default)s)")
-parser.add_argument("-c", "--cutoff",
-                    action="store", default=3, type=float, metavar="VALUE",
-                    help="histogram pixel cutoff percentage (default: %(default)s)")
-parser.add_argument("-q", "--quantize",
-                    action="store", default=255, type=int, metavar="VALUE",
-                    help="number of colors to quantize the image into (default: %(default)s)")
-parser.add_argument("-t", "--text",
-                    action="store", type=argparse.FileType('w'), dest="output_text", metavar="FILE",
-                    help="name of text output file")
-parser.add_argument("-i", "--image",
-                    action="store", type=str, dest="output_image", metavar="FILE",
-                    help="name of image output file")
+def get_args():
+    '''Parses the commandline arguments
+    :return: Argparse Namespace'''
 
-parser.add_argument("-clh", "--cutoff-low-high",  # contrast-low-high
-                    action="store", type=int, dest="clh", metavar=("LOW", "HIGH"), nargs=2,
-                    help="low and high value for contrast (Check: PIL.ImageOps.autocontrast) (--clh wil override -c)")
+    parser = argparse.ArgumentParser(description="Textify Images With Python")
 
-parser.add_argument("--random",
-                    action="store_true",
-                    help="randomize characters while producing image (use for binary images)")
-parser.add_argument("--invert",
-                    action="store_true",
-                    help="invert the provided image")
-parser.add_argument("--white-bg",
-                    action="store_true",
-                    help="use white background for output image (use black color for text)")
-parser.add_argument("--transparent",
-                    action="store_true",
-                    help="make a transparent output image")
-parser.add_argument("--chars",
-                    action="store", default=" `~!sTomN@", type=list, metavar="STRING",
-                    help="ascii character list to use (default: '%(default)s')")
-# parser.add_argument("--image-size",
-#                     action="store", nargs=2, type=int, metavar=("X", "Y"),
-#                     help="force a specific size for the produced image")
-parser.add_argument("--font-size",
-                    action="store", default=12, type=int, metavar="VALUE",
-                    help="font size for image output")
-parser.add_argument("--line-spacing",
-                    action="store", default=5, type=int, metavar="VALUE",
-                    help="line spacing for image output (default: %(default)s)")
-parser.add_argument("--font-face",
-                    action="store", default="consola.ttf", type=str, metavar="TTF_FILE",
-                    help="font face for image output (default: %(default)s)")
-parser.add_argument("--y-shrink",
-                    action="store", default=1.99999, type=float, metavar="VALUE",
-                    help="input image y-axis shrink factor (default: %(default)s)")
-parser.add_argument("--sharpen",
-                    action="store", default=0, type=int, metavar="VALUE",
-                    help="Number of iterations of sharpen filters (default: %(default)s)")
-parser.add_argument('--alt',
-                    action='store_true',
-                    help='use alternative font settings (for mac or linux)')
+    parser.add_argument("image",
+                        action="store", type=str,
+                        help="image to textify")
+    parser.add_argument("-s", "--size",
+                        action="store", default=110, type=int, metavar="VALUE",
+                        help="number of characters in a line (default: %(default)s)")
+    parser.add_argument("-c", "--cutoff",
+                        action="store", default=3, type=float, metavar="VALUE",
+                        help="histogram pixel cutoff percentage (default: %(default)s)")
+    parser.add_argument("-q", "--quantize",
+                        action="store", default=255, type=int, metavar="VALUE",
+                        help="number of colors to quantize the image into (default: %(default)s)")
+    parser.add_argument("-t", "--text",
+                        action="store", type=argparse.FileType('w'), dest="output_text", metavar="FILE",
+                        help="name of text output file")
+    parser.add_argument("-i", "--image",
+                        action="store", type=str, dest="output_image", metavar="FILE",
+                        help="name of image output file")
 
-parsed_args = parser.parse_args()
+    parser.add_argument("-clh", "--cutoff-low-high",  # contrast-low-high
+                        action="store", type=int, dest="clh", metavar=("LOW", "HIGH"), nargs=2,
+                        help="low and high value for contrast (Check: PIL.ImageOps.autocontrast) (--clh wil override -c)")
 
-IMAGE_FILE = parsed_args.image
-SIZE = parsed_args.size
-CONTRAST_CUTOFF = parsed_args.cutoff
-QUANTIZE = parsed_args.quantize
-TXT_OUTPUT = parsed_args.output_text
-IMAGE_OUTPUT = parsed_args.output_image
+    parser.add_argument("--random",
+                        action="store_true",
+                        help="randomize characters while producing image (use for binary images)")
+    parser.add_argument("--invert",
+                        action="store_true",
+                        help="invert the provided image")
+    parser.add_argument("--white-bg",
+                        action="store_true",
+                        help="use white background for output image (use black color for text)")
+    parser.add_argument("--transparent",
+                        action="store_true",
+                        help="make a transparent output image")
+    parser.add_argument("--chars",
+                        action="store", default=" `~!sTomN@", type=list, metavar="STRING",
+                        help="ascii character list to use (default: '%(default)s')")
+    # parser.add_argument("--image-size",
+    #                     action="store", nargs=2, type=int, metavar=("X", "Y"),
+    #                     help="force a specific size for the produced image")
+    parser.add_argument("--font-size",
+                        action="store", default=12, type=int, metavar="VALUE",
+                        help="font size for image output")
+    parser.add_argument("--line-spacing",
+                        action="store", default=5, type=int, metavar="VALUE",
+                        help="line spacing for image output (default: %(default)s)")
+    parser.add_argument("--font-face",
+                        action="store", default="consola.ttf", type=str, metavar="TTF_FILE",
+                        help="font face for image output (default: %(default)s)")
+    parser.add_argument("--y-shrink",
+                        action="store", default=1.99999, type=float, metavar="VALUE",
+                        help="input image y-axis shrink factor (default: %(default)s)")
+    parser.add_argument("--sharpen",
+                        action="store", default=0, type=int, metavar="VALUE",
+                        help="Number of iterations of sharpen filters (default: %(default)s)")
+    parser.add_argument('--alt',
+                        action='store_true',
+                        help="use alternative font settings (for mac or linux) (will overwrite font-face, line-spacing, y-shrink, and chars)")
 
-RANDOM = parsed_args.random
-INVERT = parsed_args.invert
-WHITE_BG = parsed_args.white_bg
-TRANSPARENT = parsed_args.transparent
-CHARS = parsed_args.chars
-# IMG_OUT_SIZE = parsed_args.image_size
-FONT_SIZE = parsed_args.font_size
-SPACING = parsed_args.line_spacing
-FONT_FILE = parsed_args.font_face
-Y_SHRINK = parsed_args.y_shrink
-SHARPEN = parsed_args.sharpen
-if parsed_args.clh:
-    CONTRAST_CUTOFF = tuple(parsed_args.clh)
-    # print(CONTRAST_CUTOFF)
-
-if parsed_args.alt:
-    # TODO: make a different setting set for macOS
-    FONT_FILE = "font/Inconsolata-Regular.ttf"
-    SPACING = 1
-    Y_SHRINK = 2
-    CHARS = " `~!1f2d@"
-
-assert len(CHARS) > 1, "Specify at least 2 characters"
-
-# DEFAULT VALUES:
-# SIZE = 110
-# CONTRAST_CUTOFF = 3
-# QUANTIZE = 255
-
-# RANDOM = False
-# INVERT = False
-# WHITE_BG = False
-# CHARS = " `~!sTomN@"
-# IMG_OUT_SIZE = None
-# FONT_SIZE = 12
-# SPACING = 5
-# FONT_FILE = "consola.ttf"
-# Y_SHRINK = 1.956
-# TEXT = ""
-
-# print(parsed_args)
+    # parsed_args = parser.parse_args()
+    return parser.parse_args()
 
 
 def invert(img):
@@ -246,59 +203,115 @@ def save_text():
 def save_image():
     pass
 
+
+def main():
+
+    parsed_args = get_args()
+
+    IMAGE_FILE = parsed_args.image
+    SIZE = parsed_args.size
+    CONTRAST_CUTOFF = parsed_args.cutoff
+    QUANTIZE = parsed_args.quantize
+    TXT_OUTPUT = parsed_args.output_text
+    IMAGE_OUTPUT = parsed_args.output_image
+
+    RANDOM = parsed_args.random
+    INVERT = parsed_args.invert
+    WHITE_BG = parsed_args.white_bg
+    TRANSPARENT = parsed_args.transparent
+    CHARS = parsed_args.chars
+    # IMG_OUT_SIZE = parsed_args.image_size
+    FONT_SIZE = parsed_args.font_size
+    SPACING = parsed_args.line_spacing
+    FONT_FILE = parsed_args.font_face
+    Y_SHRINK = parsed_args.y_shrink
+    SHARPEN = parsed_args.sharpen
+    if parsed_args.clh:
+        CONTRAST_CUTOFF = tuple(parsed_args.clh)
+        # print(CONTRAST_CUTOFF)
+
+    if parsed_args.alt:
+        # TODO: make a different setting set for macOS
+        FONT_FILE = "font/Inconsolata-Regular.ttf"
+        SPACING = 1
+        Y_SHRINK = 2
+        CHARS = " `~!1f2d@"
+
+    assert len(CHARS) > 1, "Specify at least 2 characters"
+
+    # DEFAULT VALUES:
+    # SIZE = 110
+    # CONTRAST_CUTOFF = 3
+    # QUANTIZE = 255
+
+    # RANDOM = False
+    # INVERT = False
+    # WHITE_BG = False
+    # CHARS = " `~!sTomN@"
+    # IMG_OUT_SIZE = None
+    # FONT_SIZE = 12
+    # SPACING = 5
+    # FONT_FILE = "consola.ttf"
+    # Y_SHRINK = 1.956
+    # TEXT = ""
+
+    # print(parsed_args)
+
+    img = Image.open(IMAGE_FILE).convert("L")
+
+    ORIG_HEIGHT = img.height
+    ORIG_WIDTH = img.width
+
+    print(f"Input Image Aspect Ratio: {img.height/img.width}")
+
+    print("Resizing Image")
+    img = resize(img, SIZE, Y_SHRINK)
+
+    if INVERT:
+        print("Inverting Image")
+        img = invert(img)
+
+    print("Adjusting Contrast")
+    img = autocontrast(img, CONTRAST_CUTOFF)
+
+    print("Quantizing Color")
+    img = quantize(img, QUANTIZE)
+
+    for _ in range(SHARPEN):
+        img = img.filter(ImageFilter.SHARPEN)
+
+    print("Converting Image to ASCII")
+    TEXT = convert_to_ascii(img, CHARS, RANDOM)
+
+    img.close()
+
+    if SIZE < 116:
+        print(TEXT)
+    else:
+        print("Image Too Large To Display On Console")
+
+    if TXT_OUTPUT:
+        print("Making Text File")
+        TXT_OUTPUT.writelines(TEXT)
+        print(f"{TXT_OUTPUT.name} Saved")
+
+    if IMAGE_OUTPUT:
+        print("Making Image File")
+
+        img_out = image_it(TEXT, FONT_SIZE, SPACING,
+                           FONT_FILE, WHITE_BG, TRANSPARENT)
+
+        # if IMG_OUT_SIZE:
+        #     print("Resizing Output Image")
+        #     img_out = img_out.resize(tuple(IMG_OUT_SIZE), resample=Image.BICUBIC)
+
+        print(f"Produced Image Aspect Ratio: {img_out.height/img_out.width}")
+
+        img_out.save(IMAGE_OUTPUT)
+        print(f"{IMAGE_OUTPUT} Saved")
+
 ################################ PROGRAM ################################
 
 
-img = Image.open(IMAGE_FILE).convert("L")
-
-ORIG_HEIGHT = img.height
-ORIG_WIDTH = img.width
-
-print(f"Input Image Aspect Ratio: {img.height/img.width}")
-
-print("Resizing Image")
-img = resize(img, SIZE, Y_SHRINK)
-
-if INVERT:
-    print("Inverting Image")
-    img = invert(img)
-
-print("Adjusting Contrast")
-img = autocontrast(img, CONTRAST_CUTOFF)
-
-print("Quantizing Color")
-img = quantize(img, QUANTIZE)
-
-for _ in range(SHARPEN):
-    img = img.filter(ImageFilter.SHARPEN)
-
-
-print("Converting Image to ASCII")
-TEXT = convert_to_ascii(img, CHARS, RANDOM)
-
-img.close()
-
-if SIZE < 116:
-    print(TEXT)
-else:
-    print("Image Too Large To Display On Console")
-
-if TXT_OUTPUT:
-    print("Making Text File")
-    TXT_OUTPUT.writelines(TEXT)
-    print(f"{TXT_OUTPUT.name} Saved")
-
-if IMAGE_OUTPUT:
-    print("Making Image File")
-
-    img_out = image_it(TEXT, FONT_SIZE, SPACING,
-                       FONT_FILE, WHITE_BG, TRANSPARENT)
-
-    # if IMG_OUT_SIZE:
-    #     print("Resizing Output Image")
-    #     img_out = img_out.resize(tuple(IMG_OUT_SIZE), resample=Image.BICUBIC)
-
-    print(f"Produced Image Aspect Ratio: {img_out.height/img_out.width}")
-
-    img_out.save(IMAGE_OUTPUT)
-    print(f"{IMAGE_OUTPUT} Saved")
+if __name__ == "__main__":
+    main()
